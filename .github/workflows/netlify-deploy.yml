@@ -1,0 +1,67 @@
+name: Netlify Deploy (Alternative)
+
+# This workflow provides an alternative to Vercel deployment
+# Uncomment and configure if you prefer Netlify over Vercel
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# env:
+#   NODE_VERSION: '20'
+#   PNPM_VERSION: '8'
+
+# jobs:
+#   deploy:
+#     name: Deploy to Netlify
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup pnpm
+#         uses: pnpm/action-setup@v4
+#         with:
+#           version: ${{ env.PNPM_VERSION }}
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: ${{ env.NODE_VERSION }}
+#           cache: 'pnpm'
+
+#       - name: Install dependencies
+#         run: pnpm install --frozen-lockfile
+
+#       - name: Build application
+#         run: pnpm run build
+#         env:
+#           CI: true
+
+#       - name: Deploy to Netlify
+#         uses: netlify/actions/cli@master
+#         with:
+#           args: deploy --dir=dist --functions=netlify/functions
+#         env:
+#           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+#           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+#       - name: Deploy to Netlify (Production)
+#         if: github.ref == 'refs/heads/main'
+#         uses: netlify/actions/cli@master
+#         with:
+#           args: deploy --dir=dist --prod --functions=netlify/functions
+#         env:
+#           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+#           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+# Alternative: Using Netlify GitHub App (Recommended)
+# Instead of this workflow, you can:
+# 1. Connect your repo to Netlify via their GitHub app
+# 2. Configure build settings in Netlify dashboard:
+#    - Build command: npm run build
+#    - Publish directory: dist
+#    - Node version: 20
