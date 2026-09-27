@@ -108,6 +108,29 @@
   --ring: 224.3 76.3% 94.1%;
 }
 
+/*
+ * Variables for the plain-CSS History and Deleted tabs (TaskHistory.css, DeletedTasks.css).
+ * Light values come from App.css, which is not imported. Dark values match the
+ * hard-coded dark colours already used in those two files.
+ */
+:root {
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --card-bg: #ffffff;
+  --primary-color: #6366f1;
+  --primary-rgb: 99, 102, 241;
+  --secondary-color: #f3f4f6;
+}
+
+.dark {
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --border-color: #444444;
+  --card-bg: #2a2a2a;
+  --secondary-color: #444444;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   @apply w-2;
