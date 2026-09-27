@@ -47,7 +47,7 @@ export const fetchAllTasks = createAsyncThunk(
         return response.data.map(convertApiTaskToTask);
       }
       return rejectWithValue(response.message || 'Failed to fetch tasks');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while fetching tasks');
     }
   }
@@ -63,7 +63,7 @@ export const addTask = createAsyncThunk(
         return convertApiTaskToTask(response.data);
       }
       return rejectWithValue(response.message || 'Failed to create task');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while creating task');
     }
   }
@@ -78,7 +78,7 @@ export const toggleTaskComplete = createAsyncThunk(
         return convertApiTaskToTask(response.data);
       }
       return rejectWithValue(response.message || 'Failed to toggle task');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while toggling task');
     }
   }
@@ -93,7 +93,7 @@ export const deleteTask = createAsyncThunk(
         return taskId;
       }
       return rejectWithValue(response.message || 'Failed to delete task');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while deleting task');
     }
   }
@@ -117,7 +117,7 @@ export const updateTask = createAsyncThunk(
         return convertApiTaskToTask(response.data);
       }
       return rejectWithValue(response.message || 'Failed to update task');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while updating task');
     }
   }
@@ -137,7 +137,7 @@ export const completeAllOldTasks = createAsyncThunk(
         }
       }
       return rejectWithValue(response.message || 'Failed to complete old tasks');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while completing old tasks');
     }
   }
@@ -156,7 +156,7 @@ export const deleteAllOldTasks = createAsyncThunk(
         }
       }
       return rejectWithValue(response.message || 'Failed to delete old tasks');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while deleting old tasks');
     }
   }
@@ -175,7 +175,7 @@ export const deleteAllCompletedOldTasks = createAsyncThunk(
         }
       }
       return rejectWithValue(response.message || 'Failed to delete completed old tasks');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while deleting completed old tasks');
     }
   }
@@ -191,7 +191,7 @@ export const restoreTask = createAsyncThunk(
         return convertApiTaskToTask(response.data);
       }
       return rejectWithValue(response.message || 'Failed to restore task');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while restoring task');
     }
   }
@@ -207,7 +207,7 @@ export const permanentlyDeleteTask = createAsyncThunk(
         return taskId;
       }
       return rejectWithValue(response.message || 'Failed to permanently delete task');
-    } catch (error) {
+    } catch {
       return rejectWithValue('Network error while permanently deleting task');
     }
   }
