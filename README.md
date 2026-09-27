@@ -45,7 +45,7 @@ Backend (Node.js, Express, TypeScript, PostgreSQL, Passport Google OAuth): [vive
 | Styling | Tailwind CSS v4 (via `@tailwindcss/postcss`, reusing `tailwind.config.js` through `@config`), class-based dark mode, component CSS files, `clsx` / `class-variance-authority` for UI primitives |
 | Animation / icons | Framer Motion, lucide-react |
 | Tooling | Vite 7, ESLint 9 (typescript-eslint, react-hooks) |
-| CI | GitHub Actions: typecheck, lint and build on Node 20 and 22 |
+| CI | GitHub Actions: typecheck, lint and build on Node 22 and 24 |
 
 ## Project structure
 
@@ -63,7 +63,7 @@ src/
 │   ├── DeletedTasks.tsx    # Restore or permanently delete
 │   ├── TaskHistory.tsx     # Task change log
 │   └── UserProfile.tsx
-├── contexts/               # AuthContext, ThemeContext
+├── contexts/               # AuthProvider / ThemeProvider (.tsx) and their useAuth / useTheme hooks (.ts)
 ├── config.ts               # API_URL / API_BASE_URL from VITE_API_URL
 ├── services/api.ts         # REST client (tasks and auth)
 ├── store/                  # store.ts, taskSlice.ts, selectors.ts, typed hooks
@@ -76,7 +76,7 @@ src/
 ## Getting started
 
 ### Prerequisites
-- Node.js 20.19+ or 22.12+ (required by Vite 7) and npm
+- Node.js 22.12+ and npm. Vite 7 also runs on 20.19+, but Node 20 is end-of-life and CI tests only 22 and 24.
 - A running copy of [daily-task-manager-backend](https://github.com/vivek721/daily-task-manager-backend). By default the app expects it on `http://localhost:3001` (see [Connecting to the backend](#connecting-to-the-backend) to change this). That repo documents its own PostgreSQL and Google OAuth setup. Set its `FRONTEND_URL` to `http://localhost:5173`: the backend uses it both for CORS and to send the Google OAuth redirect back to this app.
 
 ### Install and run
@@ -114,7 +114,7 @@ If the backend runs on `http://localhost:3001`, you don't need an env file. To p
 
 ## Testing
 
-There are no automated tests yet. CI (`.github/workflows/`) runs type checking, linting and a production build on Node 20 and 22. Lint failures are non-blocking in the `ci-cd.yml` pipeline but fail the `ci.yml` workflow (see [Known issues](#known-issues)).
+There are no automated tests yet. CI (`.github/workflows/`) runs type checking, linting and a production build on Node 22 and 24, plus an `npm audit` check. Lint errors fail the build.
 
 ## Deployment
 
@@ -125,9 +125,7 @@ Set `VITE_API_URL` to the production backend origin when you build, because Vite
 
 ## Known issues
 
-- `npm run lint` reports 24 errors: hooks called inside a `try` block in `App.tsx`, unused `catch` bindings in `taskSlice.ts`, a few `any` types, and the context files exporting hooks alongside components. Because of these errors, the `ci.yml` workflow fails at its lint step.
-- The History and Deleted tabs are styled by `TaskHistory.css` and `DeletedTasks.css`. These files use CSS variables (`--text-primary`, `--card-bg`, …) that are defined only in `App.css`, which is never imported. Their dark styles also follow `prefers-color-scheme` rather than the theme toggle, so these two tabs don't match the rest of the app's theme.
-- `preview-deploy.yml` installs with pnpm (`pnpm install --frozen-lockfile`), but the repo only has an npm `package-lock.json`, so preview deployments fail at the install step.
+- The task form, task lists and Old Tasks components (`TaskForm`, `TaskList`, `TaskItem`, `OldTasks`) use class names such as `form-input`, `task-item` and `old-tasks-section` that are defined only in `src/App.css`. Nothing imports that file, so these components render without their intended styles. Importing it as-is would also restyle `body` and shared classes like `.btn`, so it needs to be ported to the Tailwind styling first.
 
 ## Roadmap (not yet built)
 
