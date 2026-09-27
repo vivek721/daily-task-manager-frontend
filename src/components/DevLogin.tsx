@@ -1,12 +1,13 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../config';
 
 const DevLogin: React.FC = () => {
   const { login } = useAuth();
 
   const handleDevLogin = async () => {
     try {
-      const response = await fetch('/api/auth/dev-login', {
+      const response = await fetch(`${API_BASE_URL}/auth/dev-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
