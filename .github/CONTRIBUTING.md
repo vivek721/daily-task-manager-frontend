@@ -5,15 +5,15 @@ We welcome contributions to the Daily Task Manager! This document provides guide
 ## Getting Started
 
 ### Prerequisites
-- Node.js 20.19+ or 22.12+ (required by Vite 7)
-- npm or pnpm (preferred)
+- Node.js 22.12+ (Vite 7 needs 20.19+ or 22.12+; Node 20 is end-of-life)
+- npm (the repo ships a `package-lock.json`)
 - Git
 
 ### Development Setup
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/daily-task-manager-frontend.git`
-3. Install dependencies: `pnpm install`
-4. Start development server: `pnpm run dev`
+3. Install dependencies: `npm install`
+4. Start development server: `npm run dev`
 5. Open http://localhost:5173 in your browser
 
 ## Development Workflow
@@ -36,9 +36,9 @@ We welcome contributions to the Daily Task Manager! This document provides guide
 ### Quality Checks
 Before submitting a PR, ensure:
 ```bash
-pnpm run typecheck  # TypeScript compilation
-pnpm run lint       # ESLint checks
-pnpm run build      # Production build
+npm run typecheck  # TypeScript compilation
+npm run lint       # ESLint checks
+npm run build      # Production build
 ```
 
 ### Testing
