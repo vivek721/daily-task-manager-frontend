@@ -74,7 +74,7 @@ Use the existing Dockerfile for containerized deployments.
 ## CI/CD Pipeline Features
 
 ### Quality Checks
-- **Multi-Node Testing**: Tests on Node.js 18, 20, and 22
+- **Multi-Node Testing**: Tests on Node.js 20 and 22
 - **TypeScript Compilation**: Ensures type safety
 - **ESLint Validation**: Code quality and consistency
 - **Security Audits**: Dependency vulnerability scanning

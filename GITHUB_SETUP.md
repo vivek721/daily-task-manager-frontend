@@ -6,7 +6,7 @@ This guide walks you through setting up your Daily Task Manager frontend reposit
 
 - GitHub account
 - Git installed locally
-- Node.js 18+ installed
+- Node.js 20.19+ or 22.12+ installed (required by Vite 7)
 - Choose a hosting platform (Vercel recommended)
 
 ## 🚀 Quick Setup
@@ -121,7 +121,7 @@ daily-task-manager-frontend/
 ### Automated Quality Checks
 - ✅ TypeScript compilation (`npm run typecheck`)
 - ✅ ESLint code quality (`npm run lint`)
-- ✅ Multi-Node.js version testing (18, 20, 22)
+- ✅ Multi-Node.js version testing (20, 22)
 - ✅ Security audit (`npm audit`)
 - ✅ Bundle size analysis
 

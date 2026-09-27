@@ -5,7 +5,7 @@ We welcome contributions to the Daily Task Manager! This document provides guide
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ (recommended: Node.js 20)
+- Node.js 20.19+ or 22.12+ (required by Vite 7)
 - npm or pnpm (preferred)
 - Git
 
