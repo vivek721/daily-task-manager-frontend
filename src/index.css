@@ -1,15 +1,20 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+/* Reuse the v3-style JS config (theme colors, fonts, animations, plugins). */
+@config "../tailwind.config.js";
+
+/* Class-based dark mode: ThemeContext toggles `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground min-h-screen font-sans antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    @apply min-h-screen font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -37,7 +42,7 @@
   }
   
   .card-hover {
-    @apply card hover:shadow-2xl hover:-translate-y-1 transition-all duration-300;
+    @apply bg-white dark:bg-secondary-800 rounded-2xl shadow-xl border border-secondary-200 dark:border-secondary-700 overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300;
   }
   
   .input-field {
