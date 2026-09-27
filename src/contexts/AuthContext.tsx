@@ -1,29 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  picture?: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (token: string) => void;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
+import { AuthContext, type AuthContextType, type User } from './useAuth';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -54,7 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const verifyToken = async (token: string) => {
     console.log('Verifying token...', token.substring(0, 20) + '...');
     try {
-      const response = await fetch('http://localhost:3001/api/auth/verify', {
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

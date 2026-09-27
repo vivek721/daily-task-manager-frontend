@@ -48,7 +48,7 @@ Vercel provides excellent React/Vite support with zero configuration.
 **Configuration:**
 - Build Command: `npm run build`
 - Output Directory: `dist`
-- Node.js Version: `20`
+- Node.js Version: `22`
 
 ### Option 2: Netlify
 Great alternative with similar features.
@@ -58,7 +58,7 @@ Great alternative with similar features.
 2. Configure build settings:
    - Build command: `npm run build`
    - Publish directory: `dist`
-   - Node version: `20`
+   - Node version: `22`
 
 **Manual Setup with GitHub Actions:**
 1. Uncomment `.github/workflows/netlify-deploy.yml`
@@ -74,7 +74,7 @@ Use the existing Dockerfile for containerized deployments.
 ## CI/CD Pipeline Features
 
 ### Quality Checks
-- **Multi-Node Testing**: Tests on Node.js 18, 20, and 22
+- **Multi-Node Testing**: Tests on Node.js 22 and 24
 - **TypeScript Compilation**: Ensures type safety
 - **ESLint Validation**: Code quality and consistency
 - **Security Audits**: Dependency vulnerability scanning

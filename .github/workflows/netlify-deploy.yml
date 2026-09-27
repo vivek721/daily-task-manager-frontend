@@ -10,7 +10,7 @@ name: Netlify Deploy (Alternative)
 #     branches: [ main ]
 
 # env:
-#   NODE_VERSION: '20'
+#   NODE_VERSION: '22'
 #   PNPM_VERSION: '8'
 
 # jobs:
@@ -64,4 +64,4 @@ name: Netlify Deploy (Alternative)
 # 2. Configure build settings in Netlify dashboard:
 #    - Build command: npm run build
 #    - Publish directory: dist
-#    - Node version: 20
+#    - Node version: 22

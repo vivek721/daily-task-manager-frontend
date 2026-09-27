@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { Task } from '../types/Task';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { 
   selectOldTasks, 
@@ -78,7 +79,7 @@ export const OldTasks: React.FC = () => {
 
   const getOldTasksByDate = () => {
     const today = new Date().toDateString();
-    const oldTasksByDate: { [key: string]: any[] } = {};
+    const oldTasksByDate: Record<string, Task[]> = {};
     
     Object.entries(tasksByDate).forEach(([dateString, tasks]) => {
       if (dateString !== today && new Date(dateString) < new Date(today)) {

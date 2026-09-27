@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { taskAPI } from '../services/api';
 
 interface SignInFormData {
@@ -50,9 +50,9 @@ const SignIn: React.FC<SignInProps> = ({ onToggleMode }) => {
       });
 
       login(data.token);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Sign in error:', error);
-      setError(error.message || 'Network error. Please try again.');
+      setError(error instanceof Error && error.message ? error.message : 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }

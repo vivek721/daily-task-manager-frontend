@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/useAuth';
 import { taskAPI } from '../services/api';
 
 interface SignUpFormData {
@@ -94,9 +94,9 @@ const SignUp: React.FC<SignUpProps> = ({ onToggleMode }) => {
       });
 
       login(data.token);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Signup error:', error);
-      setErrors([error.message || 'Network error. Please try again.']);
+      setErrors([error instanceof Error && error.message ? error.message : 'Network error. Please try again.']);
     } finally {
       setLoading(false);
     }

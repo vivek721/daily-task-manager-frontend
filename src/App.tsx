@@ -8,10 +8,12 @@ import { DeletedTasks } from './components/DeletedTasks';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { addTask, toggleTaskComplete, deleteTask, fetchAllTasks } from './store/taskSlice';
 import { selectTodaysTasks, selectOtherTasks } from './store/selectors';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { useAuth } from './contexts/useAuth';
 import LoginPage from './components/LoginPage';
 import AuthCallback from './components/AuthCallback';
 import UserProfile from './components/UserProfile';
+import { TaskManagerErrorBoundary } from './components/TaskManagerErrorBoundary';
 import { Card, CardContent } from './components/ui/Card';
 import { Button } from './components/ui/Button';
 import { ThemeToggle } from './components/ui/ThemeToggle';
@@ -30,46 +32,45 @@ import { formatDate } from './lib/utils';
 type TabType = 'tasks' | 'history' | 'deleted' | 'old';
 
 const TaskManager = () => {
-  try {
-    const { user, loading: authLoading } = useAuth();
-    const dispatch = useAppDispatch();
-    const todaysTasks = useAppSelector(selectTodaysTasks);
-    const otherTasks = useAppSelector(selectOtherTasks);
-    const loading = useAppSelector(state => state.tasks.loading);
-    const error = useAppSelector(state => state.tasks.error);
-    const [showForm, setShowForm] = useState(false);
-    const [activeTab, setActiveTab] = useState<TabType>('tasks');
-    
-    // Fetch tasks when component mounts (must be called before any conditional returns)
-    useEffect(() => {
-      if (user) {
-        dispatch(fetchAllTasks());
-      }
-    }, [dispatch, user]);
-    
-    // Debug logging
-    console.log('TaskManager render - user:', user, 'authLoading:', authLoading);
-
-    // Handle authentication loading state
-    if (authLoading) {
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 dark:from-secondary-950 dark:via-secondary-900 dark:to-secondary-800 flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center gap-4"
-          >
-            <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
-            <p className="text-secondary-600 dark:text-secondary-400">Loading your workspace...</p>
-          </motion.div>
-        </div>
-      );
+  const { user, loading: authLoading } = useAuth();
+  const dispatch = useAppDispatch();
+  const todaysTasks = useAppSelector(selectTodaysTasks);
+  const otherTasks = useAppSelector(selectOtherTasks);
+  const loading = useAppSelector(state => state.tasks.loading);
+  const error = useAppSelector(state => state.tasks.error);
+  const [showForm, setShowForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('tasks');
+  
+  // Fetch tasks when component mounts (must be called before any conditional returns)
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchAllTasks());
     }
+  }, [dispatch, user]);
+  
+  // Debug logging
+  console.log('TaskManager render - user:', user, 'authLoading:', authLoading);
 
-    // Show login page if not authenticated
-    if (!user) {
-      return <LoginPage />;
-    }
+  // Handle authentication loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 dark:from-secondary-950 dark:via-secondary-900 dark:to-secondary-800 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+          <p className="text-secondary-600 dark:text-secondary-400">Loading your workspace...</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Show login page if not authenticated
+  if (!user) {
+    return <LoginPage />;
+  }
 
 
   const handleAddTask = (taskData: TaskFormData) => {
@@ -282,16 +283,6 @@ const TaskManager = () => {
       </main>
     </div>
   );
-  } catch (error) {
-    console.error('TaskManager error:', error);
-    return (
-      <div style={{ padding: '20px', color: 'red' }}>
-        <h2>Error in TaskManager</h2>
-        <p>Error: {error instanceof Error ? error.message : String(error)}</p>
-        <button onClick={() => window.location.reload()}>Reload Page</button>
-      </div>
-    );
-  }
 };
 
 const App = () => {
@@ -302,7 +293,9 @@ const App = () => {
 
   return (
     <AuthProvider>
-      <TaskManager />
+      <TaskManagerErrorBoundary>
+        <TaskManager />
+      </TaskManagerErrorBoundary>
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }

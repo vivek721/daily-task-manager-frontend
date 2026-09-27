@@ -1,4 +1,5 @@
 import React from 'react';
+import { API_BASE_URL } from '../config';
 
 interface GoogleLoginButtonProps {
   onSuccess?: () => void;
@@ -9,8 +10,7 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = () => {
 
   const handleGoogleLogin = () => {
     // Redirect to backend Google OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    window.location.href = `${backendUrl}/api/auth/google`;
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   return (
