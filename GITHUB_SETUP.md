@@ -94,8 +94,7 @@ daily-task-manager-frontend/
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci-cd.yml              # Main CI/CD pipeline
-│   │   ├── preview-deploy.yml     # PR preview deployments
-│   │   └── netlify-deploy.yml     # Alternative Netlify setup
+│   │   └── preview-deploy.yml     # PR preview deployments
 │   ├── ISSUE_TEMPLATE/
 │   │   ├── bug_report.md
 │   │   └── feature_request.md
