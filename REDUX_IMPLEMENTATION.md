@@ -8,7 +8,6 @@ The Daily Task Manager has been successfully refactored to use Redux Toolkit for
 
 ### 1. Store Configuration (`src/store/store.ts`)
 - **Redux Toolkit**: Uses `configureStore` for simplified store setup
-- **Redux Persist**: Automatically saves and restores state from localStorage
 - **Middleware**: Configured to handle non-serializable values (Date objects in tasks)
 - **Type Safety**: Full TypeScript support with `RootState` and `AppDispatch` types
 
@@ -61,17 +60,12 @@ interface TaskState {
 - Component re-rendering only when relevant data changes
 - Efficient data filtering and sorting
 
-### 3. **Data Persistence**
-- Redux Persist automatically saves state to localStorage
-- Seamless data restoration on app reload
-- Configurable persistence (can exclude sensitive data)
-
-### 4. **Developer Experience**
+### 3. **Developer Experience**
 - Full TypeScript support with type inference
 - Redux DevTools integration for debugging
 - Clear separation of concerns
 
-### 5. **Scalability**
+### 4. **Scalability**
 - Easy to add new features and actions
 - Clean architecture for additional slices
 - Middleware support for async operations
@@ -123,19 +117,11 @@ const handleAddTask = (taskData: TaskFormData) => {
 ## File Structure
 ```
 src/store/
-├── store.ts          # Store configuration with persistence
+├── store.ts          # Store configuration
 ├── taskSlice.ts      # Task actions and reducers
 ├── selectors.ts      # Memoized selectors
 └── hooks.ts          # Typed Redux hooks
 ```
-
-## Persistence Configuration
-
-Redux Persist is configured to:
-- Store data in localStorage under the key 'root'
-- Only persist the 'tasks' slice (excludes UI state)
-- Handle Date objects in task data properly
-- Show loading state during rehydration
 
 ## Future Enhancements
 
