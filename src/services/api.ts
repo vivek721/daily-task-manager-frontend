@@ -21,6 +21,17 @@ export interface ApiTask {
   updated_at: string;
 }
 
+export interface TaskHistoryEntry {
+  history_id: string;
+  task_id: string;
+  action: string;
+  old_data: Partial<ApiTask> | null;
+  new_data: Partial<ApiTask> | null;
+  changed_fields: string[];
+  action_timestamp: string;
+  task_title: string;
+}
+
 export interface CreateTaskData {
   title: string;
   description?: string;
@@ -79,22 +90,22 @@ class TaskAPI {
   ): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
         headers: {
           ...this.getAuthHeaders(),
           ...options.headers,
         },
-        ...options,
       });
 
-      const data = await response.json();
-      
-      // Handle authentication errors
+      // Handle authentication errors before parsing, since a 401 body may not be JSON
       if (response.status === 401) {
         localStorage.removeItem('authToken');
         window.location.href = '/login';
         throw new Error('Authentication required');
       }
-      
+
+      const data = await response.json();
+
       return data;
     } catch (error) {
       console.error('API request failed:', error);
@@ -172,11 +183,11 @@ class TaskAPI {
   }
 
   // Get task history
-  async getTaskHistory(taskId?: string, limit: number = 100): Promise<ApiResponse<any[]>> {
-    const endpoint = taskId 
-      ? `/tasks/${taskId}/history?limit=${limit}`
+  async getTaskHistory(taskId?: string, limit: number = 100): Promise<ApiResponse<TaskHistoryEntry[]>> {
+    const endpoint = taskId
+      ? `/tasks/${encodeURIComponent(taskId)}/history?limit=${limit}`
       : `/tasks/history/all?limit=${limit}`;
-    return this.request<any[]>(endpoint);
+    return this.request<TaskHistoryEntry[]>(endpoint);
   }
 
   // Bulk operations
@@ -252,7 +263,7 @@ class TaskAPI {
     }
   }
 
-  async verifyToken(): Promise<{ success: boolean; user: any }> {
+  async verifyToken(): Promise<{ success: boolean; user: AuthResponse['user'] }> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',

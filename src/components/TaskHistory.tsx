@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react';
+import { taskAPI, type TaskHistoryEntry } from '../services/api';
 import './TaskHistory.css';
 
-interface HistoryItem {
-  history_id: string;
-  task_id: string;
-  action: string;
-  old_data: any;
-  new_data: any;
-  changed_fields: string[];
-  action_timestamp: string;
-  task_title: string;
-}
+type HistoryItem = TaskHistoryEntry;
+type TaskSnapshot = TaskHistoryEntry['old_data'];
 
 export function TaskHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -19,33 +12,28 @@ export function TaskHistory() {
   const [limit, setLimit] = useState(50);
 
   useEffect(() => {
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        const data = await taskAPI.getTaskHistory(selectedTaskId || undefined, limit);
+
+        if (data.success) {
+          setHistory(data.data ?? []);
+        } else {
+          console.error('Failed to fetch history:', data.message);
+          setHistory([]);
+        }
+      } catch (error) {
+        console.error('Error fetching history:', error);
+        // Fallback to empty array on error
+        setHistory([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchHistory();
   }, [selectedTaskId, limit]);
-
-  const fetchHistory = async () => {
-    setLoading(true);
-    try {
-      const url = selectedTaskId 
-        ? `http://localhost:3001/api/tasks/${selectedTaskId}/history?limit=${limit}`
-        : `http://localhost:3001/api/tasks/history/all?limit=${limit}`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      if (data.success) {
-        setHistory(data.data);
-      } else {
-        console.error('Failed to fetch history:', data.message);
-        setHistory([]);
-      }
-    } catch (error) {
-      console.error('Error fetching history:', error);
-      // Fallback to empty array on error
-      setHistory([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
@@ -87,7 +75,7 @@ export function TaskHistory() {
     );
   };
 
-  const renderDataComparison = (oldData: any, newData: any, action: string) => {
+  const renderDataComparison = (oldData: TaskSnapshot, newData: TaskSnapshot, action: string) => {
     if (action === 'created') {
       return (
         <div className="data-comparison">

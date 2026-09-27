@@ -1,17 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAppDispatch } from '../store/hooks';
 import { restoreTask, permanentlyDeleteTask } from '../store/taskSlice';
+import { taskAPI, type ApiTask } from '../services/api';
 import './DeletedTasks.css';
 
-interface DeletedTask {
-  id: string;
-  title: string;
-  description?: string;
-  priority: 'low' | 'medium' | 'high';
-  category?: string;
-  deleted_at: string;
-  created_at: string;
-}
+type DeletedTask = ApiTask & { deleted_at: string };
 
 export function DeletedTasks() {
   const dispatch = useAppDispatch();
@@ -25,11 +18,10 @@ export function DeletedTasks() {
   const fetchDeletedTasks = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/tasks/deleted');
-      const data = await response.json();
-      
+      const data = await taskAPI.getDeletedTasks();
+
       if (data.success) {
-        setDeletedTasks(data.data);
+        setDeletedTasks((data.data ?? []) as DeletedTask[]);
       } else {
         console.error('Failed to fetch deleted tasks:', data.message);
         setDeletedTasks([]);
