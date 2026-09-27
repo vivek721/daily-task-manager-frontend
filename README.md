@@ -27,11 +27,11 @@ Backend (Node.js, Express, TypeScript, PostgreSQL, Passport Google OAuth): [vive
 **Deleted tasks and history**
 - The Deleted tab lists soft-deleted tasks with a countdown to their 24-hour expiry, and lets you restore a task or delete it permanently
 - The History tab shows a log of task changes (created, updated, completed, deleted), filterable by task
-- See [Known issues](#known-issues) about auth headers on these two tabs
 
 **UI**
 - Tabbed layout: Current Tasks, Old Tasks, History, Deleted
 - Loading and error states, with a retry button when fetching tasks fails
+- Light, dark and system theme toggle in the header (the choice is saved in `localStorage`)
 - Animated transitions (Framer Motion), Lucide icons, and a responsive layout
 
 ## Tech stack
@@ -41,11 +41,11 @@ Backend (Node.js, Express, TypeScript, PostgreSQL, Passport Google OAuth): [vive
 | UI | React 19, TypeScript 5.8 |
 | State | Redux Toolkit: one `tasks` slice with async thunks, plus memoized selectors built with `createSelector` |
 | Auth state | React Context (`AuthContext`), with the JWT kept in `localStorage` |
-| Data | `fetch`-based API client (`src/services/api.ts`) that talks to the Express backend |
-| Styling | Tailwind CSS (via `@tailwindcss/postcss`), component CSS files, `clsx` / `class-variance-authority` for UI primitives |
+| Data | `fetch`-based API client (`src/services/api.ts`) that talks to the Express backend at `VITE_API_URL` |
+| Styling | Tailwind CSS v4 (via `@tailwindcss/postcss`, reusing `tailwind.config.js` through `@config`), class-based dark mode, component CSS files, `clsx` / `class-variance-authority` for UI primitives |
 | Animation / icons | Framer Motion, lucide-react |
 | Tooling | Vite 7, ESLint 9 (typescript-eslint, react-hooks) |
-| CI | GitHub Actions: typecheck, lint and build on Node 18/20/22 |
+| CI | GitHub Actions: typecheck, lint and build on Node 20 and 22 |
 
 ## Project structure
 
@@ -64,19 +64,20 @@ src/
 │   ├── TaskHistory.tsx     # Task change log
 │   └── UserProfile.tsx
 ├── contexts/               # AuthContext, ThemeContext
+├── config.ts               # API_URL / API_BASE_URL from VITE_API_URL
 ├── services/api.ts         # REST client (tasks and auth)
 ├── store/                  # store.ts, taskSlice.ts, selectors.ts, typed hooks
 ├── types/Task.ts
 ├── lib/utils.ts
 ├── App.tsx                 # Auth gate, header and tab layout
-└── main.tsx                # Redux Provider and root render
+└── main.tsx                # Redux Provider, ThemeProvider and root render
 ```
 
 ## Getting started
 
 ### Prerequisites
-- Node.js 20.19+ (required by Vite 7) and npm
-- A running copy of [daily-task-manager-backend](https://github.com/vivek721/daily-task-manager-backend) on `http://localhost:3001`. That repo documents its own PostgreSQL and Google OAuth setup. Set its `FRONTEND_URL` to `http://localhost:5173` so the Google OAuth redirect lands back on this app.
+- Node.js 20.19+ or 22.12+ (required by Vite 7) and npm
+- A running copy of [daily-task-manager-backend](https://github.com/vivek721/daily-task-manager-backend). By default the app expects it on `http://localhost:3001` (see [Connecting to the backend](#connecting-to-the-backend) to change this). That repo documents its own PostgreSQL and Google OAuth setup. Set its `FRONTEND_URL` to `http://localhost:5173`: the backend uses it both for CORS and to send the Google OAuth redirect back to this app.
 
 ### Install and run
 
@@ -89,14 +90,13 @@ npm run dev          # http://localhost:5173
 
 ### Connecting to the backend
 
-Most API calls go to the fixed address `http://localhost:3001/api`, so for local development the backend must run on port 3001. The main client, the auth context, and the History and Deleted tabs all use this address.
+Every request to the backend (the task API, sign-up and sign-in, token checks, the "Sign in with Google" redirect and the dev-only test login) goes to one base URL, set in `src/config.ts`:
 
-| Setting | Where | Purpose |
+| Variable | Default | Purpose |
 | --- | --- | --- |
-| `VITE_API_URL` (optional, default `http://localhost:3001`) | `.env.local` | Backend origin for the "Sign in with Google" redirect. No other request reads it. |
-| Vite dev proxy `/api` to `http://localhost:3001` | `vite.config.ts` | Used by the dev-only test login |
+| `VITE_API_URL` | `http://localhost:3001` | Backend origin, without the `/api` suffix. Requests go to `${VITE_API_URL}/api/...`. |
 
-No `.env` file is needed for local development if the backend runs on port 3001.
+If the backend runs on `http://localhost:3001`, you don't need an env file. To point the app at a different backend, copy `.env.example` to `.env.local` and set `VITE_API_URL`. Vite inlines the value at build time, so restart `npm run dev` or rebuild after you change it. The browser calls the backend directly (there is no dev proxy), so the backend's `FRONTEND_URL` must match the origin the app is served from.
 
 ### npm scripts
 
@@ -105,7 +105,7 @@ No `.env` file is needed for local development if the backend runs on port 3001.
 | `npm run dev` | Start the Vite dev server on port 5173 |
 | `npm run build` | Type-check (`tsc -b`) and build for production into `dist/` |
 | `npm run preview` | Serve the production build locally |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | Type-check the app and config (`tsc -b`) |
 | `npm run lint` / `npm run lint:fix` | Run ESLint, or run it and apply fixes |
 | `npm run check-all` | Typecheck, lint and build |
 | `npm run pre-commit` | Typecheck and lint |
@@ -114,17 +114,20 @@ No `.env` file is needed for local development if the backend runs on port 3001.
 
 ## Testing
 
-There are no automated tests yet. CI (`.github/workflows/`) runs type checking, linting and a production build. Lint failures in the `ci-cd.yml` pipeline are currently non-blocking.
+There are no automated tests yet. CI (`.github/workflows/`) runs type checking, linting and a production build on Node 20 and 22. Lint failures are non-blocking in the `ci-cd.yml` pipeline but fail the `ci.yml` workflow (see [Known issues](#known-issues)).
 
 ## Deployment
 
-The repo includes starting configurations for Docker (a multi-stage build served by nginx), Netlify (`netlify.toml`) and Vercel (`vercel.json`). The Netlify and Vercel files proxy `/api/*` to the placeholder `http://your-backend-url.com`, which has to be replaced with a real backend address. The API base URL is also hard-coded to `localhost` (see below), so a production deployment needs that address made configurable first.
+Set `VITE_API_URL` to the production backend origin when you build, because Vite bakes it into the bundle. On the backend, set `FRONTEND_URL` to the deployed frontend origin so CORS and the Google OAuth redirect work.
+
+- **Docker**: a multi-stage build (Node 22 Alpine, served by nginx). Pass the backend address as a build argument: `docker build --build-arg VITE_API_URL=https://api.example.com -t daily-task-manager .`
+- **Netlify / Vercel**: `netlify.toml` and `vercel.json` are included. Add `VITE_API_URL` as an environment variable in the project settings. Both files also proxy `/api/*` to the placeholder `http://your-backend-url.com`. The app does not use that proxy, because it calls `VITE_API_URL` directly. The SPA fallback to `index.html` in these files is still needed.
 
 ## Known issues
 
-- `ThemeToggle` in the header calls `useTheme()`, but `ThemeProvider` is never mounted in `main.tsx`/`App.tsx`. `useTheme()` throws when there is no provider, so the app needs to be wrapped in `ThemeProvider` before the light/dark/system toggle can work.
-- The History and Deleted tabs call `fetch` directly without the `Authorization` header. The backend requires a token on every `/api/tasks/*` route, so these tabs will get `401` responses until they use the shared API client.
-- The API base URL is hard-coded to `http://localhost:3001/api` in several files instead of being read from `VITE_API_URL`.
+- `npm run lint` reports 24 errors: hooks called inside a `try` block in `App.tsx`, unused `catch` bindings in `taskSlice.ts`, a few `any` types, and the context files exporting hooks alongside components. Because of these errors, the `ci.yml` workflow fails at its lint step.
+- The History and Deleted tabs are styled by `TaskHistory.css` and `DeletedTasks.css`. These files use CSS variables (`--text-primary`, `--card-bg`, …) that are defined only in `App.css`, which is never imported. Their dark styles also follow `prefers-color-scheme` rather than the theme toggle, so these two tabs don't match the rest of the app's theme.
+- `preview-deploy.yml` installs with pnpm (`pnpm install --frozen-lockfile`), but the repo only has an npm `package-lock.json`, so preview deployments fail at the install step.
 
 ## Roadmap (not yet built)
 
