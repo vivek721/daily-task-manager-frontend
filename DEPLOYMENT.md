@@ -61,7 +61,7 @@ Great alternative with similar features.
    - Node version: `22`
 
 **Manual Setup with GitHub Actions:**
-1. Uncomment `.github/workflows/netlify-deploy.yml`
+1. Add a deploy workflow using `netlify/actions/cli` (a commented-out template was removed in this repo's history; see the `chore: remove commented-out Netlify workflow` commit)
 2. Get Netlify token and site ID
 3. Add secrets to GitHub repository
 
