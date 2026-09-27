@@ -1,148 +1,134 @@
-# Daily Task Manager
+# Daily Task Manager (Frontend)
 
-A streamlined todo application designed to help users efficiently manage their daily tasks and organize day-to-day work activities with minimal friction and maximum productivity.
+A single-page task manager built with React, TypeScript and Redux Toolkit, focused on the tasks you need to do today. Users sign in with a username and password or with Google. Tasks are stored on a REST API, not in the browser. The app splits tasks into today, other and old (past-due) lists. It has bulk actions for clearing out old tasks, a soft-delete bin with restore, and a change-history view for tasks.
+
+Backend (Node.js, Express, TypeScript, PostgreSQL, Passport Google OAuth): [vivek721/daily-task-manager-backend](https://github.com/vivek721/daily-task-manager-backend)
 
 ## Features
 
-### Core Task Management
-- ✅ Quick task creation with title and description
-- ✅ Task completion toggle functionality
-- ✅ Task deletion with instant feedback
-- ✅ Priority levels (High, Medium, Low) with color coding
-- ✅ Due date assignment and tracking
-- ✅ Category/tag support for organization
+**Authentication**
+- Username/password sign-up and sign-in with client-side validation (username at least 3 characters, password at least 6, passwords must match)
+- "Sign in with Google": the browser goes to the backend's `/api/auth/google` endpoint. After the OAuth handshake, the backend sends the user to `/auth/callback?token=<JWT>`, and the frontend stores the token.
+- Every API request sends the JWT as a `Bearer` token. On startup the app checks the stored token against `/api/auth/verify`. A `401` response clears the token and sends the user back to the login screen.
+- In development builds only, a "Dev Login (Test User)" button calls the backend's `/api/auth/dev-login`. The button is hidden in production builds.
+- A user menu in the header shows the user's name, email and Google avatar, with a sign-out option.
 
-### Daily Workflow Features
-- ✅ Today's tasks view as the primary interface
-- ✅ Current date display in header
-- ✅ Smart task sorting by priority and due date
-- ✅ Automatic separation of today's tasks vs. other tasks
-- ✅ Progress tracking with completion counters
+**Tasks**
+- Create a task with a title (required), description, priority (high/medium/low), due date and category
+- Mark a task complete or not complete, and delete it (a soft delete on the server)
+- **Today's Tasks** holds tasks created today or due today or later. **Other Tasks** holds everything that is neither today's nor old.
+- Lists are sorted by status (open tasks first), then priority, then due date, then creation time
+- Each list shows a completion counter, and tasks past their due date get an overdue flag
 
-### User Experience
-- ✅ Clean, minimalist design with modern styling
-- ✅ Responsive design for mobile and desktop
-- ✅ Intuitive form interface with proper validation
-- ✅ Visual feedback for task states (completed, overdue)
-- ✅ Local storage for data persistence
-- ✅ Gradient background with glassmorphism effects
+**Old tasks** (tasks that were due, or created without a due date, before today)
+- Filter by incomplete or completed, or group by date
+- Bulk actions, each with a confirmation prompt: complete all, delete completed, delete all
 
-## Getting Started
+**Deleted tasks and history**
+- The Deleted tab lists soft-deleted tasks with a countdown to their 24-hour expiry, and lets you restore a task or delete it permanently
+- The History tab shows a log of task changes (created, updated, completed, deleted), filterable by task
+- See [Known issues](#known-issues) about auth headers on these two tabs
 
-### Prerequisites
-- Node.js (version 20.19.0 or higher recommended)
-- npm (comes with Node.js)
+**UI**
+- Tabbed layout: Current Tasks, Old Tasks, History, Deleted
+- Loading and error states, with a retry button when fetching tasks fails
+- Animated transitions (Framer Motion), Lucide icons, and a responsive layout
 
-### Installation
+## Tech stack
 
-1. Clone or download the project
-2. Navigate to the project directory:
-   ```bash
-   cd daily-task-manager
-   ```
+| Area | Choice |
+| --- | --- |
+| UI | React 19, TypeScript 5.8 |
+| State | Redux Toolkit: one `tasks` slice with async thunks, plus memoized selectors built with `createSelector` |
+| Auth state | React Context (`AuthContext`), with the JWT kept in `localStorage` |
+| Data | `fetch`-based API client (`src/services/api.ts`) that talks to the Express backend |
+| Styling | Tailwind CSS (via `@tailwindcss/postcss`), component CSS files, `clsx` / `class-variance-authority` for UI primitives |
+| Animation / icons | Framer Motion, lucide-react |
+| Tooling | Vite 7, ESLint 9 (typescript-eslint, react-hooks) |
+| CI | GitHub Actions: typecheck, lint and build on Node 18/20/22 |
 
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Project structure
 
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-5. Open your browser and navigate to `http://localhost:5173`
-
-### Building for Production
-
-To create a production build:
-
-```bash
-npm run build
-```
-
-To preview the production build:
-
-```bash
-npm run preview
-```
-
-## Usage
-
-### Adding Tasks
-1. Click the "+ Add Task" button
-2. Fill in the task details:
-   - **Title** (required): Brief description of the task
-   - **Description** (optional): Additional details about the task
-   - **Priority**: Choose High, Medium, or Low priority
-   - **Due Date** (optional): Set a deadline for the task
-   - **Category** (optional): Organize tasks with custom categories
-3. Click "Add Task" to save
-
-### Managing Tasks
-- **Complete a task**: Click the checkbox next to the task title
-- **Delete a task**: Click the "Delete" button on the task
-- **View progress**: Check the completion counter in each task list header
-
-### Task Organization
-- **Today's Tasks**: Shows tasks created today or due today
-- **Other Tasks**: Shows all remaining tasks
-- **Priority Sorting**: Tasks are automatically sorted by completion status, priority, and due date
-- **Overdue Indicators**: Tasks past their due date are highlighted in red
-
-## Technical Details
-
-### Technology Stack
-- **Frontend**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Custom CSS with modern design principles
-- **Data Storage**: Browser localStorage for persistence
-- **State Management**: React hooks (useState, custom useLocalStorage hook)
-
-### Project Structure
 ```
 src/
-├── components/          # React components
-│   ├── TaskForm.tsx    # Task creation form
-│   ├── TaskItem.tsx    # Individual task display
-│   └── TaskList.tsx    # Task list container
-├── hooks/              # Custom React hooks
-│   └── useLocalStorage.ts
-├── types/              # TypeScript type definitions
-│   └── Task.ts
-├── App.tsx             # Main application component
-├── App.css             # Application styles
-└── main.tsx            # Application entry point
+├── components/
+│   ├── ui/                 # Button, Card, Input, Badge, ThemeToggle
+│   ├── LoginPage.tsx       # Switches between username/password and Google sign-in
+│   ├── SignIn.tsx / SignUp.tsx
+│   ├── GoogleLogin.tsx     # Redirects to the backend OAuth endpoint
+│   ├── AuthCallback.tsx    # Reads ?token= from the OAuth redirect
+│   ├── DevLogin.tsx        # Development-only test login
+│   ├── TaskForm.tsx / TaskList.tsx / TaskItem.tsx
+│   ├── OldTasks.tsx        # Past tasks and bulk actions
+│   ├── DeletedTasks.tsx    # Restore or permanently delete
+│   ├── TaskHistory.tsx     # Task change log
+│   └── UserProfile.tsx
+├── contexts/               # AuthContext, ThemeContext
+├── services/api.ts         # REST client (tasks and auth)
+├── store/                  # store.ts, taskSlice.ts, selectors.ts, typed hooks
+├── types/Task.ts
+├── lib/utils.ts
+├── App.tsx                 # Auth gate, header and tab layout
+└── main.tsx                # Redux Provider and root render
 ```
 
-### Data Model
-Tasks include the following properties:
-- `id`: Unique identifier (UUID)
-- `title`: Task title (required)
-- `description`: Optional task description
-- `completed`: Boolean completion status
-- `priority`: 'high' | 'medium' | 'low'
-- `dueDate`: Optional due date
-- `createdAt`: Task creation timestamp
-- `updatedAt`: Last modification timestamp
-- `category`: Optional category/tag
+## Getting started
 
-## Browser Compatibility
+### Prerequisites
+- Node.js 20.19+ (required by Vite 7) and npm
+- A running copy of [daily-task-manager-backend](https://github.com/vivek721/daily-task-manager-backend) on `http://localhost:3001`. That repo documents its own PostgreSQL and Google OAuth setup. Set its `FRONTEND_URL` to `http://localhost:5173` so the Google OAuth redirect lands back on this app.
 
-This application works in all modern browsers that support:
-- ES6+ JavaScript features
-- CSS Grid and Flexbox
-- Local Storage API
-- CSS backdrop-filter (for glassmorphism effects)
+### Install and run
 
-## Future Enhancements
+```bash
+git clone https://github.com/vivek721/daily-task-manager-frontend.git
+cd daily-task-manager-frontend
+npm install
+npm run dev          # http://localhost:5173
+```
 
-Based on the original PRD, potential future features include:
-- Voice-to-text input support
-- Bulk task import/export
-- Calendar integration
-- Time tracking and pomodoro timer
-- Subtasks and task dependencies
-- Advanced filtering and search
-- Dark mode toggle
-- Team collaboration features
+### Connecting to the backend
+
+Most API calls go to the fixed address `http://localhost:3001/api`, so for local development the backend must run on port 3001. The main client, the auth context, and the History and Deleted tabs all use this address.
+
+| Setting | Where | Purpose |
+| --- | --- | --- |
+| `VITE_API_URL` (optional, default `http://localhost:3001`) | `.env.local` | Backend origin for the "Sign in with Google" redirect. No other request reads it. |
+| Vite dev proxy `/api` to `http://localhost:3001` | `vite.config.ts` | Used by the dev-only test login |
+
+No `.env` file is needed for local development if the backend runs on port 3001.
+
+### npm scripts
+
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server on port 5173 |
+| `npm run build` | Type-check (`tsc -b`) and build for production into `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` / `npm run lint:fix` | Run ESLint, or run it and apply fixes |
+| `npm run check-all` | Typecheck, lint and build |
+| `npm run pre-commit` | Typecheck and lint |
+| `npm run analyze` | Build, then open `vite-bundle-analyzer` |
+| `npm run clean` | Remove `dist/` and the Vite cache |
+
+## Testing
+
+There are no automated tests yet. CI (`.github/workflows/`) runs type checking, linting and a production build. Lint failures in the `ci-cd.yml` pipeline are currently non-blocking.
+
+## Deployment
+
+The repo includes starting configurations for Docker (a multi-stage build served by nginx), Netlify (`netlify.toml`) and Vercel (`vercel.json`). The Netlify and Vercel files proxy `/api/*` to the placeholder `http://your-backend-url.com`, which has to be replaced with a real backend address. The API base URL is also hard-coded to `localhost` (see below), so a production deployment needs that address made configurable first.
+
+## Known issues
+
+- `ThemeToggle` in the header calls `useTheme()`, but `ThemeProvider` is never mounted in `main.tsx`/`App.tsx`. `useTheme()` throws when there is no provider, so the app needs to be wrapped in `ThemeProvider` before the light/dark/system toggle can work.
+- The History and Deleted tabs call `fetch` directly without the `Authorization` header. The backend requires a token on every `/api/tasks/*` route, so these tabs will get `401` responses until they use the shared API client.
+- The API base URL is hard-coded to `http://localhost:3001/api` in several files instead of being read from `VITE_API_URL`.
+
+## Roadmap (not yet built)
+
+- Editing an existing task from the UI (the `updateTask` thunk and `PUT /tasks/:id` endpoint already exist)
+- Search and filtering by category
+- A task statistics view (the `selectTaskStats` selector exists but is not shown anywhere)
+- Unit and component tests
